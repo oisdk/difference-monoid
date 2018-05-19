@@ -41,6 +41,9 @@ prop_AbelianMonoid = property $ monoid freeAbelian
 intDiff :: MonadGen m => m (Diff (Sum Int))
 intDiff = ((:-:) `on` Sum) <$> Gen.int (Range.linear 0 10) <*> Gen.int (Range.linear 0 10)
 
+freeDiff :: MonadGen m => m (Diff (FreeAbelian Int))
+freeDiff = (:-:) <$> freeAbelian <*> freeAbelian
+
 prop_DiffMonoid :: Property
 prop_DiffMonoid = property $ monoid intDiff
 
@@ -49,6 +52,15 @@ prop_DiffCommutative = property $ commutativity (<>) intDiff
 
 prop_DiffInversion :: Property
 prop_DiffInversion = property $ inversion (<>) mempty invert intDiff
+
+prop_FreeDiffMonoid :: Property
+prop_FreeDiffMonoid = property $ monoid freeDiff
+
+prop_FreeDiffCommutative :: Property
+prop_FreeDiffCommutative = property $ commutativity (<>) freeDiff
+
+prop_FreeDiffInversion :: Property
+prop_FreeDiffInversion = property $ inversion (<>) mempty invert freeDiff
 
 prop_DiffOrd :: Property
 prop_DiffOrd = property $ ord intDiff egte

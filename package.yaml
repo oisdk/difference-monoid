@@ -15,8 +15,10 @@ description:         Please see the README on Github at <https://github.com/oisd
 dependencies:
 - base >= 4.7 && < 5
 - groups
+- deepseq
+- adjunctions
+- distributive
 - semigroupoids
-- containers
 
 library:
   source-dirs: src
