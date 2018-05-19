@@ -31,6 +31,8 @@ instance Semigroup Odd where
     stimes n (Odd x) = Odd (x && n `mod` 2 == 1)
     {-# INLINE stimes #-}
 
+-- |
+-- prop> (x <> mempty) === (x :: Odd)
 instance Monoid Odd where
     mappend = (<>)
     {-# INLINE mappend #-}
