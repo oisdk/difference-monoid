@@ -1,0 +1,7 @@
+resolver: lts-11.9
+
+packages:
+- .
+
+extra-deps:
+- hedgehog-checkers-0.1.0.0

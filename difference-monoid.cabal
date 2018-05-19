@@ -1,0 +1,103 @@
+-- This file has been generated from package.yaml by hpack version 0.20.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: a638c56ca21c1a2c6d3d6a7009ad7577b69c55a682278e16f7c5372aa12c8da9
+
+name:           difference-monoid
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/oisdk/difference-monoid#readme>
+homepage:       https://github.com/oisdk/difference-monoid#readme
+bug-reports:    https://github.com/oisdk/difference-monoid/issues
+author:         Donnacha Oisín Kidney
+maintainer:     mail@doisinkidney.com
+copyright:      2018 Donnacha Oisín Kidney
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/oisdk/difference-monoid
+
+library
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -fwarn-incomplete-record-updates -fwarn-incomplete-uni-patterns
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , groups
+    , semigroupoids
+  if impl(ghc >= 8.0)
+    ghc-options: -fwarn-redundant-constraints -Wcompat
+  exposed-modules:
+      Data.Monoid.Diff
+  other-modules:
+      Paths_difference_monoid
+  default-language: Haskell2010
+
+test-suite difference-monoid-doctests
+  type: exitcode-stdio-1.0
+  main-is: doctests.hs
+  hs-source-dirs:
+      doctest
+  ghc-options: -Wall -fwarn-incomplete-record-updates -fwarn-incomplete-uni-patterns -threaded
+  build-depends:
+      QuickCheck
+    , base >=4.7 && <5
+    , containers
+    , difference-monoid
+    , doctest
+    , groups
+    , semigroupoids
+  if impl(ghc >= 8.0)
+    ghc-options: -fwarn-redundant-constraints -Wcompat
+  other-modules:
+      Paths_difference_monoid
+  default-language: Haskell2010
+
+test-suite difference-monoid-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -fwarn-incomplete-record-updates -fwarn-incomplete-uni-patterns -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , difference-monoid
+    , groups
+    , hedgehog
+    , hedgehog-checkers
+    , semigroupoids
+  if impl(ghc >= 8.0)
+    ghc-options: -fwarn-redundant-constraints -Wcompat
+  other-modules:
+      Paths_difference_monoid
+  default-language: Haskell2010
+
+benchmark bench
+  type: exitcode-stdio-1.0
+  main-is: bench.hs
+  hs-source-dirs:
+      bench
+  ghc-options: -Wall -fwarn-incomplete-record-updates -fwarn-incomplete-uni-patterns -threaded -rtsopts -with-rtsopts=-N -O2
+  build-depends:
+      base >=4.7 && <5
+    , containers
+    , criterion
+    , difference-monoid
+    , groups
+    , random
+    , semigroupoids
+  if impl(ghc >= 8.0)
+    ghc-options: -fwarn-redundant-constraints -Wcompat
+  other-modules:
+      Paths_difference_monoid
+  default-language: Haskell2010
