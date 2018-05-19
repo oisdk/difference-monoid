@@ -6,7 +6,7 @@
 
 name:           difference-monoid
 version:        0.1.0.0
-description:    Please see the README on Github at <https://github.com/oisdk/difference-monoid#readme>
+description:    A Difference Monoid, to add subtraction to arbitrary monoids.
 homepage:       https://github.com/oisdk/difference-monoid#readme
 bug-reports:    https://github.com/oisdk/difference-monoid/issues
 author:         Donnacha Oisín Kidney
