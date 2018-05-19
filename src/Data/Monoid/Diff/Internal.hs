@@ -279,11 +279,17 @@ instance MonadFix Parity where
     mfix f = let (p,x) = runParity (f x) in Parity (p,x)
 
 instance Adjunction Parity Diff where
-    leftAdjunct f a =
-        tabulate
-            (\e ->
-                  f (Parity (Odd e, a)))
+    leftAdjunct f a = f (Parity (Odd False, a)) :-: f (Parity (Odd True, a))
+    {-# INLINE leftAdjunct #-}
     unit a = Parity (Odd False, a) :-: Parity (Odd True, a)
-    rightAdjunct f (Parity ~(Odd e,a)) = index (f a) e
+    {-# INLINE unit #-}
+    rightAdjunct f (Parity (Odd False,a)) =
+        case f a of
+            x :-: _ -> x
+    rightAdjunct f (Parity (Odd True,a)) =
+        case f a of
+            _ :-: x -> x
+    {-# INLINE rightAdjunct #-}
     counit (Parity (Odd False,x :-: _)) = x
-    counit (Parity (Odd True,_ :-: x))  = x
+    counit (Parity (Odd True,_ :-: x)) = x
+    {-# INLINE counit #-}
