@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ace33ddc241877f375c51452bd2c9f26ae110a2cc623e469f758121f0703b7cf
+-- hash: fdd43dad3d01127f84d8a73349f3cf7ec417e50575674531d7de0d3649c1ec29
 
 name:           difference-monoid
 version:        0.1.0.0
@@ -40,7 +40,10 @@ library
   if impl(ghc >= 8.0)
     ghc-options: -fwarn-redundant-constraints -Wcompat
   exposed-modules:
+      Control.Monad.Parity
       Data.Monoid.Diff
+      Data.Monoid.Diff.Internal
+      Data.Monoid.Odd
   other-modules:
       Paths_difference_monoid
   default-language: Haskell2010
