@@ -7,26 +7,36 @@
 
 module Data.Monoid.Diff where
 
-import           Data.Group
-import           Data.Semigroup
+import           Data.Group                 (Group(..))
+import           Data.Semigroup             (Semigroup(..))
 
-import           GHC.Generics        (Generic, Generic1)
-import           Control.DeepSeq     (NFData (rnf))
-import           Data.Data
+import           Control.DeepSeq            (NFData (rnf))
+import           Data.Data                  (Data, Typeable)
+import           Data.Functor.Classes       (Read1 (liftReadPrec),
+                                             Show1 (liftShowsPrec))
+import           GHC.Generics               (Generic, Generic1)
+import           Text.Read                  (Lexeme (Symbol), lift, parens,
+                                             prec, step)
+import           Text.Read.Lex              (expect)
 
-import           Control.Applicative
-import           Control.Monad.Fix
-import           Control.Monad.Zip
+import           Control.Applicative        (liftA2)
+import           Control.Monad.Fix          (MonadFix(..))
+import           Control.Monad.Zip          (MonadZip(..))
 
-import           Data.Functor.Rep
-import           Data.Distributive
+import           Data.Distributive          (Distributive(..))
+import           Data.Functor.Rep           (Representable(..))
 
-import           Data.Semigroup.Foldable
-import           Data.Semigroup.Traversable
-import           Data.List.NonEmpty (NonEmpty(..))
-import           Data.Functor.Apply
+import           Data.Functor.Apply         (Apply(..))
+import           Data.Functor.Bind          (Bind(..))
+import           Data.Functor.Extend        (Extend(..))
+import           Data.List.NonEmpty         (NonEmpty (..))
+import           Data.Semigroup.Foldable    (Foldable1(..))
+import           Data.Semigroup.Traversable (Traversable1(..))
 
-import           Data.Foldable
+import           Control.Comonad            (Comonad(..),ComonadApply(..))
+
+import           Data.Bool                  (bool)
+import           Data.Foldable              (Foldable(..))
 
 infixl 6 :-:
 data Diff a =
@@ -87,6 +97,10 @@ instance Applicative Diff where
     {-# INLINE (<*>) #-}
     liftA2 f (xx :-: xy) (yx :-: yy) = f xx yx :-: f xy yy
     {-# INLINE liftA2 #-}
+    _ *> ys = ys
+    {-# INLINE (*>) #-}
+    xs <* _ = xs
+    {-# INLINE (<*) #-}
 
 instance Monad Diff where
     return = pure
@@ -97,10 +111,19 @@ instance Monad Diff where
         _ :-: y = f xy
     {-# INLINE (>>=) #-}
 
+instance Bind Diff where
+    (xx :-: xy) >>- f = x :-: y
+      where
+        x :-: _ = f xx
+        _ :-: y = f xy
+    {-# INLINE (>>-) #-}
+
 instance Semigroup a =>
          Semigroup (Diff a) where
     (xp :-: xn) <> (yp :-: yn) = (xp <> yp) :-: (xn <> yn)
     {-# INLINE (<>) #-}
+    stimes n (x :-: y) = stimes n x :-: stimes n y
+    {-# INLINE stimes #-}
 
 instance (Monoid a) =>
          Monoid (Diff a) where
@@ -145,20 +168,26 @@ instance MonadFix Diff where
 instance MonadZip Diff where
     mzipWith = liftA2
     {-# INLINE mzipWith #-}
+    munzip ((xx,xy) :-: (yx,yy)) = (xx :-: yx, xy :-: yy)
+    {-# INLINE munzip #-}
 
 instance NFData a => NFData (Diff a) where
     rnf (x :-: y) = rnf x `seq` rnf y
 
 instance Distributive Diff where
-  distribute f = fmap (\(x :-: _) -> x) f :-: fmap (\(_ :-: y) -> y) f
-  {-# INLINE distribute #-}
+    distribute f =
+        fmap (\(x :-: _) -> x) f :-: fmap (\(_ :-: y) -> y) f
+    {-# INLINE distribute #-}
+    collect g f =
+        fmap (\xs -> case g xs of (x :-: _) -> x) f :-:
+        fmap (\ys -> case g ys of (_ :-: y) -> y) f
+    {-# INLINE collect #-}
 
 instance Representable Diff where
     type Rep Diff = Bool
     tabulate f = f False :-: f True
     {-# INLINE tabulate #-}
-    index (x :-: _) False = x
-    index (_ :-: y) True  = y
+    index (x :-: y) = bool x y
     {-# INLINE index #-}
 
 instance Foldable1 Diff where
@@ -174,3 +203,52 @@ instance Traversable1  Diff where
     {-# INLINE traverse1 #-}
     sequence1 (x :-: y) = liftF2 (:-:) x y
     {-# INLINE sequence1 #-}
+
+instance Apply Diff where
+    (fx :-: fy) <.> (xx :-: xy) = fx xx :-: fy xy
+    {-# INLINE (<.>) #-}
+    liftF2 f (xx :-: xy) (yx :-: yy) = f xx yx :-: f xy yy
+    {-# INLINE liftF2 #-}
+    _ .> ys = ys
+    {-# INLINE (.>) #-}
+    xs <. _ = xs
+    {-# INLINE (<.) #-}
+
+instance Comonad Diff where
+    extract (x :-: _) = x
+    {-# INLINE extract #-}
+    duplicate (x :-: y) = (x :-: y) :-: (y :-: x)
+    {-# INLINE duplicate #-}
+    extend f xy@(x :-: y) = f xy :-: f (y :-: x)
+    {-# INLINE extend #-}
+
+instance ComonadApply Diff where
+    (fx :-: fy) <@> (xx :-: xy) = fx xx :-: fy xy
+    {-# INLINE (<@>) #-}
+    _ @> ys = ys
+    {-# INLINE (@>) #-}
+    xs <@ _ = xs
+    {-# INLINE (<@) #-}
+
+instance Bounded a => Bounded (Diff a) where
+    minBound = minBound :-: maxBound
+    {-# INLINE minBound #-}
+    maxBound = maxBound :-: minBound
+    {-# INLINE maxBound #-}
+
+instance Show1 Diff where
+    liftShowsPrec s _ d (xs :-: ys) =
+        showParen (d > 6) $ s 7 xs . showString " :-: " . s 7 ys
+
+instance Read1 Diff where
+    liftReadPrec rp _ =
+        parens $
+        prec
+            6
+            (liftA2 (:-:) (step rp) (lift (expect (Symbol ":-:")) *> step rp))
+
+instance Extend Diff where
+    duplicated (x :-: y) = (x :-: y) :-: (y :-: x)
+    {-# INLINE duplicated #-}
+    extended f xy@(x :-: y) = f xy :-: f (y :-: x)
+    {-# INLINE extended #-}

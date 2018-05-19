@@ -19,6 +19,7 @@ dependencies:
 - adjunctions
 - distributive
 - semigroupoids
+- comonad
 
 library:
   source-dirs: src

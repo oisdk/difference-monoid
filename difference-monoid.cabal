@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 827e7ec2c78f8fe4f0e742e517c04a89c66d7fb2708d26d6ad8ff3862fb78e36
+-- hash: ace33ddc241877f375c51452bd2c9f26ae110a2cc623e469f758121f0703b7cf
 
 name:           difference-monoid
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
   build-depends:
       adjunctions
     , base >=4.7 && <5
+    , comonad
     , deepseq
     , distributive
     , groups
@@ -54,6 +55,7 @@ test-suite difference-monoid-doctests
       QuickCheck
     , adjunctions
     , base >=4.7 && <5
+    , comonad
     , deepseq
     , difference-monoid
     , distributive
@@ -75,6 +77,7 @@ test-suite difference-monoid-test
   build-depends:
       adjunctions
     , base >=4.7 && <5
+    , comonad
     , containers
     , deepseq
     , difference-monoid
@@ -98,6 +101,7 @@ benchmark bench
   build-depends:
       adjunctions
     , base >=4.7 && <5
+    , comonad
     , criterion
     , deepseq
     , difference-monoid
