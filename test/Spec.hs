@@ -13,9 +13,8 @@ import qualified Data.Map.Strict  as Map
 import           Data.Function
 
 import           Data.Monoid.Diff
+import           Data.Monoid.Odd
 import           Data.Semigroup
-import           Data.Group
-
 
 newtype FreeAbelian a = FreeAbelian
     { getFreeAbelian :: Map a Int
@@ -44,14 +43,32 @@ intDiff = ((:-:) `on` Sum) <$> Gen.int (Range.linear 0 10) <*> Gen.int (Range.li
 freeDiff :: MonadGen m => m (Diff (FreeAbelian Int))
 freeDiff = (:-:) <$> freeAbelian <*> freeAbelian
 
+oddGen :: MonadGen m => m Odd
+oddGen = fmap Odd Gen.bool
+
 prop_DiffMonoid :: Property
 prop_DiffMonoid = property $ monoid intDiff
 
 prop_DiffCommutative :: Property
 prop_DiffCommutative = property $ commutativity (<>) intDiff
 
+prop_OddMonoid :: Property
+prop_OddMonoid = property $ monoid oddGen
+
+prop_OddCommutative :: Property
+prop_OddCommutative = property $ commutativity (<>) oddGen
+
+prop_oddSTimes :: Property
+prop_oddSTimes = property $ do
+    x <- forAll oddGen
+    n <- forAll $ Gen.int (Range.linear 0 100)
+    stimesMonoid n x === stimes n x
+
 prop_DiffInversion :: Property
 prop_DiffInversion = property $ inversion (<>) mempty invert intDiff
+
+prop_OddInversion :: Property
+prop_OddInversion = property $ inversion (<>) mempty invert oddGen
 
 prop_FreeDiffMonoid :: Property
 prop_FreeDiffMonoid = property $ monoid freeDiff

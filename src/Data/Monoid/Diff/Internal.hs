@@ -1,5 +1,7 @@
 {-# options_ghc -fno-warn-noncanonical-monoid-instances #-}
 
+{-# OPTIONS_HADDOCK not-home #-}
+
 {-# LANGUAGE BangPatterns               #-}
 {-# LANGUAGE DeriveDataTypeable         #-}
 {-# LANGUAGE DeriveFoldable             #-}
@@ -47,11 +49,12 @@ import           Control.Comonad.Env.Class  (ComonadEnv)
 import           Data.Bool                  (bool)
 import           Data.Foldable              (Foldable (..))
 
-infixl 6 :-:
+-- | The Difference Monoid.
 data Diff a =
     !a :-: !a
     deriving (Show,Read,Data,Typeable,Generic,Generic1)
 
+infixl 6 :-:
 instance Functor Diff where
     fmap f (x :-: y) = f x :-: f y
     {-# INLINE fmap #-}
@@ -152,24 +155,45 @@ instance (Eq a, Semigroup a) =>
 
 instance (Ord a, Semigroup a) =>
          Ord (Diff a) where
-    compare (xp :-: xn) (yp :-: yn) = compare (yn <> xp) (xn <> yp)
+    compare (xp :-: xn) (yp :-: yn) = compare (xp <> yn) (xn <> yp)
     {-# INLINE compare #-}
 
+-- | Lift a monoid into the difference monoid.
+--
+-- >>> diff (Sum 1)
+-- Sum {getSum = 1} :-: Sum {getSum = 0}
 diff :: Monoid a => a -> Diff a
 diff x = x :-: mempty
 {-# INLINE diff #-}
 
+-- | The inverse of 'diff'.
+--
+-- @'retract' '.' 'diff' = 'id'@
 retract :: Group a => Diff a -> a
 retract (x :-: y) = x `mappend` invert y
 {-# INLINE retract #-}
 
+-- | A group homomorphism given a monoid homomorphism.
 foldDiff :: Group b => (a -> b) -> Diff a -> b
 foldDiff f (x :-: y) = f x `mappend` invert (f y)
 {-# INLINE foldDiff #-}
 
+-- | Given a "normalizing" function, try simplify the representation.
+--
+-- For instance, one such normalizing function may be to take the
+-- numeric difference of two types:
+--
+-- >>> let sumNorm x y = if x >= y then (x - y, 0) else (0, y - x)
+-- >>> normalize sumNorm ((foldMap (diff.Sum) [1..10]) <> (invert (foldMap (diff.Sum) [1..5])))
+-- Sum {getSum = 40} :-: Sum {getSum = 0}
 normalize :: (a -> a -> (a, a)) -> Diff a -> Diff a
 normalize f (x :-: y) = uncurry (:-:) (f x y)
 {-# INLINE normalize #-}
+
+-- | Interpret the difference using a subtraction function.
+runDiff :: (a -> a -> b) -> Diff a -> b
+runDiff f (x :-: y) = f x y
+{-# INLINE runDiff #-}
 
 instance MonadFix Diff where
     mfix f  = (let n :-: _ = f n in n) :-: (let _ :-: d = f d in d)
@@ -262,6 +286,7 @@ instance Extend Diff where
     extended f xy@(x :-: y) = f xy :-: f (y :-: x)
     {-# INLINE extended #-}
 
+-- | The 'Parity' 'Comonad'. It is left-adjunct to 'Data.Monoid.Diff'.
 newtype Parity a = Parity
     { runParity :: (Odd, a)
     } deriving (Functor,Foldable,Traversable,Foldable1,Applicative
@@ -293,3 +318,6 @@ instance Adjunction Parity Diff where
     counit (Parity (Odd False,x :-: _)) = x
     counit (Parity (Odd True,_ :-: x)) = x
     {-# INLINE counit #-}
+
+-- $setup
+-- >>> import Data.Monoid hiding (diff, (<>))
