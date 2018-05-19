@@ -51,3 +51,5 @@ multiplication, and sets:
 `fromList [1] <> fromList [1,2] = fromList [1] <> fromList [2]`
 
 This type is known formally as the [Grothendieck group](https://en.wikipedia.org/wiki/Grothendieck_group).
+
+The package also provides the `Parity` monad and comonad, which is left-adjunct to the difference monoid.
