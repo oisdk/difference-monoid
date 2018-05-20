@@ -1,3 +1,5 @@
+[![Hackage](https://img.shields.io/hackage/v/difference-monoid.svg)](http://hackage.haskell.org/package/difference-monoid)
+
 # difference-monoid
 
 This package provides the Difference Monoid, which adds subtraction to
