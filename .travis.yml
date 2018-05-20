@@ -1,0 +1,7 @@
+language: haskell
+matrix:
+  include:
+  - ghc: "7.10"
+  - ghc: "8.0"
+  - ghc: "8.2"
+  - ghc: "8.4"

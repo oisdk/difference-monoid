@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 814f702b7822bc24e311185abb8d0d8d6e5a451789b132b18ae03b0bee6a103a
+-- hash: 23ac1aa5ce38368671845a60039ac3b25014a83e5789f73f57514a8ac1ff71f0
 
 name:           difference-monoid
 version:        0.1.0.0
@@ -16,7 +16,6 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 cabal-version:  >= 1.10
-
 extra-source-files:
     ChangeLog.md
     README.md
